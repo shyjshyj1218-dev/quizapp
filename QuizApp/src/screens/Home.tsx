@@ -59,8 +59,10 @@ export default function Home({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.bannerTopSpacer} />
         <WeeklyRankingBanner />
         <View style={styles.bannerSpacer} />
+        <View style={styles.challengeSpacer} />
         <WeeklyChallengeSection />
       </ScrollView>
       <GameModeCards
@@ -90,7 +92,13 @@ const styles = StyleSheet.create({
   spacer: {
     height: 12,
   },
+  bannerTopSpacer: {
+    height: 16,
+  },
   bannerSpacer: {
     height: 16,
+  },
+  challengeSpacer: {
+    height: 12,
   },
 });

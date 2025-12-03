@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Path, Rect, Circle } from 'react-native-svg';
 import { colors } from '../utils/colors';
 
 interface GameModeCardsProps {
@@ -25,7 +26,16 @@ export default function GameModeCards({
           onPress={onQuizRoomPress}
           activeOpacity={0.8}
         >
-          <Text style={styles.cardIcon}>📺</Text>
+          <View style={styles.cardIcon}>
+            <Svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke={colors.text.white} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <Path d="M13 7 8.7 2.7a2.41 2.41 0 0 0-3.4 0L2.7 5.3a2.41 2.41 0 0 0 0 3.4L7 13"/>
+              <Path d="m8 6 2-2"/>
+              <Path d="m18 16 2-2"/>
+              <Path d="m17 11 4.3 4.3c.94.94.94 2.46 0 3.4l-2.6 2.6c-.94.94-2.46.94-3.4 0L11 17"/>
+              <Path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+              <Path d="m15 5 4 4"/>
+            </Svg>
+          </View>
           <View style={styles.cardContent}>
             <Text style={styles.cardTitle}>퀴즈방</Text>
             <Text style={styles.cardDescription}>
@@ -39,7 +49,16 @@ export default function GameModeCards({
           onPress={onChallengePress}
           activeOpacity={0.8}
         >
-          <Text style={styles.cardIcon}>📚</Text>
+          <View style={styles.cardIcon}>
+            <Svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke={colors.text.white} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <Path d="M2 6h4"/>
+              <Path d="M2 10h4"/>
+              <Path d="M2 14h4"/>
+              <Path d="M2 18h4"/>
+              <Rect width="16" height="20" x="4" y="2" rx="2"/>
+              <Path d="M16 2v20"/>
+            </Svg>
+          </View>
           <View style={styles.cardContent}>
             <Text style={styles.cardTitle}>도전</Text>
             <Text style={styles.cardDescription}>
@@ -55,11 +74,18 @@ export default function GameModeCards({
           onPress={() => {}}
           activeOpacity={0.8}
         >
-          <Text style={styles.cardIcon}>🏆</Text>
+          <View style={styles.cardIcon}>
+            <Svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke={colors.text.white} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <Path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <Path d="M16 3.128a4 4 0 0 1 0 7.744"/>
+              <Path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <Circle cx="9" cy="7" r="4"/>
+            </Svg>
+          </View>
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>랭킹</Text>
+            <Text style={styles.cardTitle}>방만들기</Text>
             <Text style={styles.cardDescription}>
-              순위를 확인해보세요
+              친구랑 같이 해보세요
             </Text>
           </View>
         </TouchableOpacity>
@@ -69,11 +95,16 @@ export default function GameModeCards({
           onPress={() => {}}
           activeOpacity={0.8}
         >
-          <Text style={styles.cardIcon}>🎁</Text>
+          <View style={styles.cardIcon}>
+            <Svg width={28} height={28} viewBox="0 0 24 24" fill="none" stroke={colors.text.white} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <Path d="M12 7v14"/>
+              <Path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>
+            </Svg>
+          </View>
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>상점</Text>
+            <Text style={styles.cardTitle}>멘사</Text>
             <Text style={styles.cardDescription}>
-              아이템을 구매해보세요
+              새로운 도전을 해보세요
             </Text>
           </View>
         </TouchableOpacity>
@@ -119,7 +150,8 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   cardIcon: {
-    fontSize: 24,
+    width: 28,
+    height: 28,
   },
   cardContent: {
     marginTop: 8,

@@ -69,3 +69,4 @@ COMMENT ON COLUMN matches.questions IS '문제 목록 (JSON 배열)';
 COMMENT ON COLUMN matches.start_time IS '게임 시작 시간 (Unix timestamp)';
 
 
+

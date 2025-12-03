@@ -17,6 +17,7 @@ export default function EmailLogin({ navigate }: EmailLoginProps) {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -67,61 +68,68 @@ export default function EmailLogin({ navigate }: EmailLoginProps) {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigate('Auth')}
-        >
-          <Text style={styles.backButtonText}>← 뒤로</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>
-          {isSignUp ? '회원가입' : '아이디 로그인'}
-        </Text>
-      </View>
-
       <View style={styles.content}>
+        <Text style={styles.title}>
+          {isSignUp ? 'Sign Up' : 'Login'}
+        </Text>
+
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>이메일</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="이메일을 입력하세요"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoComplete="email"
-          />
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputIcon}>✉️</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              placeholderTextColor={colors.text.secondary}
+            />
+          </View>
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>비밀번호</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="비밀번호를 입력하세요 (6자 이상)"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize="none"
-            autoComplete="password"
-          />
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputIcon}>🔒</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoComplete="password"
+              placeholderTextColor={colors.text.secondary}
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.eyeIcon}
+            >
+              <Text style={styles.eyeIconText}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {isSignUp && (
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>비밀번호 재확인</Text>
-            <TextInput
-              style={[
-                styles.input,
-                passwordConfirm && password !== passwordConfirm && styles.inputError,
-                passwordConfirm && password === passwordConfirm && styles.inputSuccess,
-              ]}
-              placeholder="비밀번호를 다시 입력하세요"
-              value={passwordConfirm}
-              onChangeText={setPasswordConfirm}
-              secureTextEntry
-              autoCapitalize="none"
-              autoComplete="password"
-            />
+            <View style={styles.inputWrapper}>
+              <Text style={styles.inputIcon}>🔒</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  passwordConfirm && password !== passwordConfirm && styles.inputError,
+                  passwordConfirm && password === passwordConfirm && styles.inputSuccess,
+                ]}
+                placeholder="Confirm Password"
+                value={passwordConfirm}
+                onChangeText={setPasswordConfirm}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoComplete="password"
+                placeholderTextColor={colors.text.secondary}
+              />
+            </View>
             {passwordConfirm && password !== passwordConfirm && (
               <Text style={styles.passwordErrorText}>비밀번호가 일치하지 않습니다.</Text>
             )}
@@ -129,6 +137,16 @@ export default function EmailLogin({ navigate }: EmailLoginProps) {
               <Text style={styles.passwordSuccessText}>✓ 비밀번호가 일치합니다.</Text>
             )}
           </View>
+        )}
+
+        {!isSignUp && (
+          <TouchableOpacity
+            style={styles.forgotPassword}
+            onPress={() => Alert.alert('비밀번호 찾기', '비밀번호 찾기 기능은 준비 중입니다.')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          </TouchableOpacity>
         )}
 
         <TouchableOpacity
@@ -141,39 +159,68 @@ export default function EmailLogin({ navigate }: EmailLoginProps) {
             <ActivityIndicator color={colors.text.white} />
           ) : (
             <Text style={styles.submitButtonText}>
-              {isSignUp ? '회원가입' : '로그인'}
+              {isSignUp ? 'Sign Up' : 'Login'}
             </Text>
           )}
         </TouchableOpacity>
 
-        {!isSignUp && (
-          <TouchableOpacity
-            style={styles.signUpButton}
-            onPress={() => setIsSignUp(true)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.signUpButtonText}>
-              계정이 없으신가요? <Text style={styles.signUpButtonTextBold}>회원가입</Text>
-            </Text>
-          </TouchableOpacity>
-        )}
+        {/* 구분선 */}
+        <View style={styles.separator}>
+          <View style={styles.separatorLine} />
+          <Text style={styles.separatorText}>or</Text>
+          <View style={styles.separatorLine} />
+        </View>
 
-        {isSignUp && (
-          <TouchableOpacity
-            style={styles.signUpButton}
-            onPress={() => {
+        {/* 소셜 로그인 버튼들 */}
+        <TouchableOpacity
+          style={styles.socialButton}
+          onPress={() => navigate('GoogleLogin')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.googleIcon}>G</Text>
+          <Text style={styles.socialButtonText}>Continue with Google</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.socialButton, styles.appleButton]}
+          onPress={() => navigate('NaverLogin')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.appleIcon}>🍎</Text>
+          <Text style={styles.socialButtonText}>Continue with Apple</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.socialButton}
+          onPress={() => navigate('Home')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.guestIcon}>👤</Text>
+          <Text style={styles.socialButtonText}>Continue As Guest</Text>
+        </TouchableOpacity>
+
+        {/* 회원가입/로그인 링크 */}
+        <TouchableOpacity
+          style={styles.signUpLink}
+          onPress={() => {
+            if (isSignUp) {
               setIsSignUp(false);
               setEmail('');
               setPassword('');
               setPasswordConfirm('');
-            }}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.signUpButtonText}>
-              이미 계정이 있으신가요? <Text style={styles.signUpButtonTextBold}>로그인</Text>
+            } else {
+              setIsSignUp(true);
+            }
+          }}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.signUpLinkText}>
+            {isSignUp ? 'Already have an account? ' : 'Need an account? '}
+            <Text style={styles.signUpLinkBold}>
+              {isSignUp ? 'Log in' : 'Sign up'}
             </Text>
-          </TouchableOpacity>
-        )}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -182,59 +229,64 @@ export default function EmailLogin({ navigate }: EmailLoginProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  backButton: {
-    marginRight: 16,
-  },
-  backButtonText: {
-    fontSize: 16,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text.primary,
+    backgroundColor: colors.backgroundWhite,
   },
   content: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingTop: 60,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: colors.primaryDark,
+    marginBottom: 32,
+    textAlign: 'center',
   },
   inputContainer: {
     marginBottom: 20,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: 8,
-  },
-  input: {
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: colors.white,
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.borderGray,
+    paddingHorizontal: 16,
+  },
+  inputIcon: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: colors.text.primary,
+  },
+  eyeIcon: {
+    padding: 4,
+  },
+  eyeIconText: {
+    fontSize: 20,
+  },
+  forgotPassword: {
+    alignItems: 'flex-end',
+    marginBottom: 20,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    color: colors.text.primary,
+    textDecorationLine: 'underline',
   },
   submitButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryDark,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 8,
-    marginBottom: 16,
+    marginBottom: 24,
   },
   submitButtonDisabled: {
     opacity: 0.6,
@@ -244,17 +296,67 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.text.white,
   },
-  signUpButton: {
+  separator: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    marginVertical: 24,
   },
-  signUpButtonText: {
+  separatorLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.borderGray,
+  },
+  separatorText: {
+    marginHorizontal: 16,
     fontSize: 14,
     color: colors.text.secondary,
   },
-  signUpButtonTextBold: {
+  socialButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.lightGray,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  appleButton: {
+    backgroundColor: colors.primaryLight,
+  },
+  googleIcon: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginRight: 12,
+    color: colors.google,
+  },
+  appleIcon: {
+    fontSize: 20,
+    marginRight: 12,
+  },
+  guestIcon: {
+    fontSize: 20,
+    marginRight: 12,
+    color: colors.text.secondary,
+  },
+  socialButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.text.primary,
+  },
+  signUpLink: {
+    alignItems: 'center',
+    marginTop: 24,
+    paddingVertical: 12,
+  },
+  signUpLinkText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+  },
+  signUpLinkBold: {
     fontWeight: '600',
-    color: colors.primary,
+    color: colors.primaryDark,
+    textDecorationLine: 'underline',
   },
   inputSuccess: {
     borderColor: '#10B981',
@@ -267,13 +369,13 @@ const styles = StyleSheet.create({
   passwordErrorText: {
     fontSize: 12,
     color: '#EF4444',
-    marginTop: 4,
+    marginTop: 8,
     marginLeft: 4,
   },
   passwordSuccessText: {
     fontSize: 12,
     color: '#10B981',
-    marginTop: 4,
+    marginTop: 8,
     marginLeft: 4,
     fontWeight: '600',
   },

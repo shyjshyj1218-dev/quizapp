@@ -132,7 +132,7 @@ io.on('connection', (socket) => {
           .select('*')
           .eq('id', data.matchId)
           .single()
-          .then(({ data: matchData, error }) => {
+          .then(({ data: matchData, error }: { data: any; error: any }) => {
             if (!error && matchData) {
               console.log(`[Game] 데이터베이스에서 매치 복원: ${data.matchId}`);
               // TODO: activeMatches에 복원 (필요시)

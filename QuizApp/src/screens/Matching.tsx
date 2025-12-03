@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../utils/colors';
 import { Header } from '../components';
 import { getUserRating } from '../utils/matchingService';
-import { getCurrentUser } from '../utils/authService';
+import { getCurrentUser, getUserNickname } from '../utils/authService';
 import { connectSocket, disconnectSocket, getSocket } from '../utils/socketService';
 
 type NavigateFunction = (screen: string, params?: any) => void;
@@ -13,12 +14,17 @@ interface MatchingProps {
 }
 
 export default function Matching({ navigate }: MatchingProps) {
+  const insets = useSafeAreaInsets();
   const [matching, setMatching] = useState(true);
   const [waitingTime, setWaitingTime] = useState(0);
   const [queueSize, setQueueSize] = useState(0);
+  const [userNickname, setUserNickname] = useState('사용자');
+  const [userCoins, setUserCoins] = useState(0);
+  const [userTickets, setUserTickets] = useState(0);
   const socketRef = useRef<any>(null);
 
   useEffect(() => {
+    loadUserData();
     startMatching();
     const timer = setInterval(() => {
       setWaitingTime((prev) => prev + 1);
@@ -39,6 +45,25 @@ export default function Matching({ navigate }: MatchingProps) {
       }
     };
   }, [matching]);
+
+  const loadUserData = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        const nickname = await getUserNickname();
+        if (nickname) {
+          setUserNickname(nickname);
+        } else if (currentUser.email) {
+          const tempNickname = currentUser.email.split('@')[0];
+          setUserNickname(tempNickname);
+        }
+        setUserCoins(currentUser.coins ?? 0);
+        setUserTickets(currentUser.tickets ?? 0);
+      }
+    } catch (error) {
+      console.error('사용자 정보 로드 오류:', error);
+    }
+  };
 
   const startMatching = async () => {
     try {
@@ -100,7 +125,7 @@ export default function Matching({ navigate }: MatchingProps) {
         console.error('[Matching] 오류 상세:', error.message);
         Alert.alert(
           '연결 오류', 
-          `서버에 연결할 수 없습니다.\n\n서버 주소: ${socket.io?.uri || '알 수 없음'}\n\n서버가 실행 중인지 확인해주세요.`
+          `서버에 연결할 수 없습니다.\n\n서버가 실행 중인지 확인해주세요.`
         );
       });
 
@@ -134,8 +159,13 @@ export default function Matching({ navigate }: MatchingProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <Header onProfilePress={() => navigate('Profile')} />
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <Header 
+        nickname={userNickname}
+        coins={userCoins}
+        tickets={userTickets}
+        onProfilePress={() => navigate('Profile')} 
+      />
       <View style={styles.content}>
         <Text style={styles.title}>매칭 중...</Text>
         <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />

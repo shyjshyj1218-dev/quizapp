@@ -85,9 +85,10 @@ export default function RealtimeMatchGame({
       // 결과가 아직 결정되지 않았으면 대기
       return;
     }
-    if (isFinished) return;
+    if (isFinishedRef.current) return;
 
     setIsFinished(true);
+    isFinishedRef.current = true;
     setIsWinner(result === 'win');
     setGameResult(result);
 
@@ -103,7 +104,7 @@ export default function RealtimeMatchGame({
       socketRef.current.emit('game-finished', {
         matchId: initialMatchId,
         result: result,
-        timeElapsed,
+        timeElapsed: timeElapsedRef.current,
         progress: userProgressRef.current,
         correctCount: userCorrectCount,
         finishTime: userFinishTime || Date.now(),
@@ -141,13 +142,13 @@ export default function RealtimeMatchGame({
         console.error('레이팅 업데이트 오류:', error);
       }
     }
-  }, [isFinished, timeElapsed, userCorrectCount, userFinishTime, currentUser, opponent, initialMatchId]);
+  }, [userCorrectCount, userFinishTime, currentUser, opponent, initialMatchId]);
 
   // 결과 비교 함수 (useEffect보다 먼저 정의)
   const compareResults = useCallback(() => {
     console.log('[compareResults] 함수 호출됨');
     
-    if (isFinished) {
+    if (isFinishedRef.current) {
       console.log('[compareResults] 이미 게임 종료됨');
       return;
     }
@@ -167,7 +168,7 @@ export default function RealtimeMatchGame({
       opponentFinishTime,
       userCorrectCount,
       opponentCorrectCount,
-      isFinished,
+      isFinished: isFinishedRef.current,
     });
     
     // 둘 다 끝나지 않았으면 대기
@@ -247,11 +248,11 @@ export default function RealtimeMatchGame({
     });
     setGameResult(result);
     finishGame(result);
-  }, [isFinished, userFinished, opponentFinished, userFinishTime, opponentFinishTime, userCorrectCount, opponentCorrectCount, finishGame]);
+  }, [userFinished, opponentFinished, userFinishTime, opponentFinishTime, userCorrectCount, opponentCorrectCount, finishGame]);
 
   // 둘 다 끝났는지 확인하는 useEffect (both-finished 이벤트가 오지 않았을 때를 위한 백업)
   useEffect(() => {
-    if (isFinished) {
+    if (isFinishedRef.current) {
       return; // 이미 게임 종료됨
     }
     
@@ -261,7 +262,7 @@ export default function RealtimeMatchGame({
     console.log('[RealtimeMatchGame] useEffect 체크:', {
       userFinished,
       opponentFinished,
-      isFinished,
+      isFinished: isFinishedRef.current,
       userProgress: userProgressRef.current,
       opponentProgress: opponentProgressRef.current,
       userProgressCheck,
@@ -271,7 +272,7 @@ export default function RealtimeMatchGame({
     // 진행 상황으로도 확인 (opponentFinished가 false여도 진행 상황이 10이면 true로 간주)
     const bothFinished = (userFinished && opponentFinished) || (userProgressCheck && opponentProgressCheck);
 
-    if (bothFinished && !isFinished) {
+    if (bothFinished && !isFinishedRef.current) {
       console.log('[RealtimeMatchGame] useEffect: 둘 다 끝남, 결과 비교 시도 (백업 로직)');
       
       // opponentFinished가 false인데 진행 상황이 10이면 강제로 true로 설정
@@ -299,7 +300,7 @@ export default function RealtimeMatchGame({
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [userFinished, opponentFinished, isFinished, compareResults, userProgress, opponentProgress, opponentFinishTime, userFinishTime]);
+  }, [userFinished, opponentFinished, compareResults, userProgress, opponentProgress, opponentFinishTime, userFinishTime]);
   
   const opponentTimerRef = useRef<NodeJS.Timeout | null>(null);
   const userProgressRef = useRef(0);
@@ -313,6 +314,17 @@ export default function RealtimeMatchGame({
   const [loading, setLoading] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(initialStartTime || Date.now());
+  const isFinishedRef = useRef(false);
+  const timeElapsedRef = useRef(0);
+
+  // ref 업데이트 (isFinished와 timeElapsed 선언 이후)
+  useEffect(() => {
+    isFinishedRef.current = isFinished;
+  }, [isFinished]);
+
+  useEffect(() => {
+    timeElapsedRef.current = timeElapsed;
+  }, [timeElapsed]);
 
   useEffect(() => {
     initializeGame();
@@ -391,11 +403,11 @@ export default function RealtimeMatchGame({
       
          // 재연결 대기
          socket.on('connect', () => {
-           console.log('[RealtimeMatchGame] Socket 재연결 성공:', socket.id);
+           console.log('[RealtimeMatchGame] Socket 재연결 성공:', socket?.id);
            socketRef.current = socket;
            
            // 서버에 재연결 알림 및 Socket ID 업데이트 요청
-           if (currentUser && initialMatchId) {
+           if (socket && currentUser && initialMatchId) {
              console.log('[RealtimeMatchGame] 재연결 알림 전송:', {
                matchId: initialMatchId,
                userId: currentUser.id,
@@ -406,7 +418,9 @@ export default function RealtimeMatchGame({
              });
            }
            
-           setupSocketListeners(socket);
+           if (socket) {
+             setupSocketListeners(socket);
+           }
          });
       
       // 재연결 실패 시 시뮬레이션 모드
@@ -829,9 +843,9 @@ export default function RealtimeMatchGame({
             gameResult === 'lose' ? styles.loseTitle : 
             styles.drawTitle
           ]}>
-            {gameResult === 'win' ? '🎉 승리!' : 
-             gameResult === 'lose' ? '😢 패배' : 
-             '🤝 무승부'}
+            {gameResult === 'win' ? '승리' : 
+             gameResult === 'lose' ? '패배' : 
+             '무승부'}
           </Text>
           <Text style={styles.resultSubtitle}>
             {gameResult === 'win'
